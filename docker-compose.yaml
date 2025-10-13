@@ -1,0 +1,39 @@
+name: docker_cia
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_server
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+      - ./mysql/conf/secure.cnf:/etc/mysql/conf.d/secure.cnf:ro
+      - ./certs:/etc/mysql/certs:ro
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+      - seccomp=default
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2g
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  dbdata:
