@@ -23,7 +23,6 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-      - seccomp=default
     deploy:
       resources:
         limits:
