@@ -1,0 +1,21 @@
+[mysqld]
+bind-address = 0.0.0.0
+
+require_secure_transport = ON
+ssl-ca   = /etc/mysql/certs/ca.pem
+ssl-cert = /etc/mysql/certs/server-cert.pem
+ssl-key  = /etc/mysql/certs/server-key.pem
+
+skip-symbolic-links
+local_infile = 0
+secure_file_priv = NULL
+
+max_connections = 150
+max_connect_errors = 100
+
+general_log = 0
+log_error = /var/log/mysql/error.log
+slow_query_log = 1
+long_query_time = 2
+
+show_compatibility_56 = OFF
