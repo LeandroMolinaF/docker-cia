@@ -19,8 +19,6 @@ services:
       - ./db/init:/docker-entrypoint-initdb.d:ro
       - ./mysql/conf/secure.cnf:/etc/mysql/conf.d/secure.cnf:ro
       - ./certs:/etc/mysql/certs:ro
-    cap_drop:
-      - ALL
     security_opt:
       - no-new-privileges:true
     deploy:
