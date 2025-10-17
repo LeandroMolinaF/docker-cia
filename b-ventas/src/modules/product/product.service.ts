@@ -34,7 +34,7 @@ export class ProductService {
         : {}),
       ...(category
         ? ({
-            category: { equals: category, mode: 'insensitive' },
+            category: { equals: category },
           } as Prisma.ProductWhereInput)
         : {}),
       ...(text
