@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  CUSTOMER
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+enum TxStatus {
+  REQUIRES_PAYMENT_METHOD
+  REQUIRES_CONFIRMATION
+  SUCCEEDED
+  FAILED
+}
+
+model User {
+  id                  String                @id @default(cuid())
+  email               String                @unique
+  password            String
+  name                String
+  role                Role                  @default(CUSTOMER)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  orders              Order[]
+  tokens              RefreshToken[]
+  profile             CustomerProfile?
+  InventoryAdjustment InventoryAdjustment[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id                  String                @id @default(cuid())
+  name                String
+  sku                 String                @unique
+  priceCents          Int
+  currency            String                @default("CLP")
+  description         String?
+  category            String?
+  image               String
+  stock               Int                   @default(0)
+  active              Boolean               @default(true)
+  deletedAt           DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  orderItems          OrderItem[]
+  InventoryAdjustment InventoryAdjustment[]
+}
+
+model CustomerProfile {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  phone           String?
+  billingAddress  Json?
+  shippingAddress Json?
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id            String               @id @default(cuid())
+  userId        String
+  status        OrderStatus          @default(PENDING)
+  subtotalCents Int
+  totalCents    Int
+  currency      String               @default("CLP")
+  notes         String?
+  items         OrderItem[]
+  txs           PaymentTransaction[]
+  confirmedAt   DateTime?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  user          User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+}
+
+model OrderItem {
+  id             String  @id @default(cuid())
+  orderId        String
+  productId      String
+  qty            Int
+  unitPriceCents Int
+  currency       String  @default("CLP")
+  order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+}
+
+model PaymentTransaction {
+  id          String   @id @default(cuid())
+  orderId     String
+  provider    String
+  status      TxStatus @default(REQUIRES_PAYMENT_METHOD)
+  amountCents Int
+  currency    String   @default("CLP")
+  raw         Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Idempotency {
+  key       String   @id
+  endpoint  String
+  userId    String?
+  response  Json
+  createdAt DateTime @default(now())
+}
+
+enum InventoryReason {
+  MANUAL_CORRECTION
+  PURCHASE_ORDER
+  SALE
+  RETURN
+  CANCEL_ORDER
+  OTHER
+}
+
+model InventoryAdjustment {
+  id             String          @id @default(cuid())
+  productId      String
+  userId         String
+  delta          Int
+  reason         InventoryReason
+  note           String?
+  idempotencyKey String?         @unique
+  createdAt      DateTime        @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Restrict)
+}
