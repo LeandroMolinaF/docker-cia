@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { LoginDto } from '../../core/types/auth.types';
+import { AuthApiService } from '../../core/services/auth-api.service';
 
 @Component({
   standalone: true,
@@ -48,6 +49,7 @@ import { LoginDto } from '../../core/types/auth.types';
 export class LoginPage {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
+  private authApi = inject(AuthApiService);
   private router = inject(Router);
 
   loading = signal(false);
@@ -74,8 +76,8 @@ export class LoginPage {
 
     this.loading.set(true);
     try {
-      await this.auth.login(this.form.getRawValue() as LoginDto);
-      this.router.navigateByUrl('/');
+        await this.authApi.login({ email: this.form.value.email!, password: this.form.value.password! });
+        this.router.navigateByUrl('/');
     } catch (e: any) {
       const msg = e?.error?.message || e?.message || 'No se pudo iniciar sesión';
       this.errorMsg.set(msg);

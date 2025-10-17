@@ -11,8 +11,13 @@ export class AuthService {
   private base = inject(API_BASE_URL);
 
   async login(dto: LoginDto) {
-    const res = await firstValueFrom(this.http.post<AuthResponse>(`${this.base}/auth/login`, dto));
-    authSignal.setSession(res.user, res.accessToken, res.refreshToken);
+    const res = await firstValueFrom(
+      this.http.post<AuthResponse>(`${this.base}/auth/login`, dto)
+    );
+    authSignal.setSession(
+      { accessToken: res.accessToken, refreshToken: res.refreshToken },
+      res.user
+    );
     return res.user;
   }
 
@@ -20,13 +25,21 @@ export class AuthService {
     const refresh = authSignal.refreshToken();
     if (!refresh) throw new Error('No refresh token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${refresh}`);
-    const res = await firstValueFrom(this.http.post<{ accessToken: string }>(`${this.base}/auth/refresh`, {}, { headers }));
+    const res = await firstValueFrom(
+      this.http.post<{ accessToken: string }>(
+        `${this.base}/auth/refresh`,
+        {},
+        { headers }
+      )
+    );
     authSignal.accessToken.set(res.accessToken);
     return res.accessToken;
   }
 
   logout() {
     authSignal.clear();
-    this.http.post(`${this.base}/v1/auth/logout`, {}).subscribe({ error: () => {} });
+    this.http
+      .post(`${this.base}/auth/logout`, {})
+      .subscribe({ error: () => {} });
   }
 }

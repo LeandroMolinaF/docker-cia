@@ -1,0 +1,11 @@
+FROM node:20-alpine
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+# Asegúrate de tener el build en angular.json con "outputPath": "dist"
+RUN npm run build -- --configuration production
+
+# Al terminar, copia la carpeta dist al host (docker cp) si lo usas manualmente

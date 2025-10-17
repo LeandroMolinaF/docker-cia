@@ -58,6 +58,6 @@ export class ProductsService {
     }
 
     async update(id: string, payload: UpdateProductDto): Promise<Product> {
-        return firstValueFrom(this.http.put<Product>(`${this.base}/products/${id}`, payload));
+        return firstValueFrom(this.http.patch<Product>(`${this.base}/products/${id}`, payload));
     }
 }

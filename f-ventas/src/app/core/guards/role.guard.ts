@@ -13,6 +13,7 @@ export class RoleGuard {
         return false;
       }
       if (!userRole || !roles.includes(userRole as any)) {
+        console.log('Redirigiendo');
         router.navigateByUrl('/');
         return false;
       }

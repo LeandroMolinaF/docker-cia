@@ -8,6 +8,7 @@ import { ProductModule } from './modules/product/product.module';
 import { CustomerModule } from './modules/customer/customer.module';
 import { OrderModule } from './modules/order/order.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { InventoryModule } from './modules/inventory/inventory.module';
     CustomerModule,
     OrderModule,
     InventoryModule,
+    PaymentModule,
     ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],

@@ -27,6 +27,6 @@ export class OrdersService {
       .set('page', String(params.page ?? 1))
       .set('size', String(params.size ?? 10));
     if (params.status) p = p.set('status', params.status);
-    return firstValueFrom(this.http.get<PaginatedOrders>(`${this.base}/v1/orders`, { params: p }));
+    return firstValueFrom(this.http.get<PaginatedOrders>(`${this.base}/orders`, { params: p }));
   }
 }
